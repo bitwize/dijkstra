@@ -1,0 +1,74 @@
+#+TITLE: Attempted implementation of Dijkstra's algorithm
+#+DATE: <2024-04-21 Sun>
+#+AUTHOR: bitwize@gmail.com
+
+* Rationale
+
+I think in order to improve as a programmer, one thing it's important
+to do is drill the basics -- data structures and algorithms. To that
+end I present an attempted implementation of Dijkstra's algorithm,
+which finds the shortest point across an undirected graph from the
+given node to any other node. It uses a minheap as a priority queue to
+find the nearest unvisited node.
+
+* Usage
+
+This program is packaged as an R7RS library for [[https://gambitscheme.org][Gambit Scheme]], whose
+library name is ~(bitwize dijkstra)~. Add the ~lib/~ directory from
+this repository to the list of source files on the command line, e.g.:
+
+: gsi dijkstra/lib/ blah.scm
+
+And then in your program file do:
+
+: (import (bitwize dijkstra))
+
+Or add it to the list of your R7RS imports if you are creating an R7RS
+library yourself.
+
+* Testing
+
+From this directory say:
+
+: make test
+
+* API
+
+  + procedure: *make-graph-node* /name/
+
+    Creates a new graph node named /name/. /name/ may be any arbitrary
+    object; symbols or numbers are good choices. A node's name is not
+    really used in the algorithm itself, but it may help with display
+    representation of the node in debugging or output.
+
+  + procedure: *graph-node?* /object/
+
+    Returns ~#t~ if /object/ is a graph node.
+
+  + procedure: *graph-node-name* /node/
+
+    Returns the name of graph node /node/.
+
+  + procedure: *connect!* /node1/ /node2/ /distance/
+
+    Creates an edge of length /distance/ between /node1/ and
+    /node2/. Edges are bidirectional; the same /distance/ will be
+    traversed, for purposes of the algorithm, whether going from
+    /node1/ to /node2/ or from /node2/ to /node1/; both directions of
+    transit will be possible.
+
+  + procedure: *find-shortests* /start-node/
+
+    Finds the shortest path from /start-node/ to every other node
+    /start-node/ is connected to, whether directly or transitively
+    through connections to other nodes.
+
+    Returns a pair of values, /dists/ and /prevs/. /dists/ is a SRFI
+    69 hash table associating nodes with the total distance along the
+    shortest path from /start-node/ (including /start-node/ itself
+    which will have a distance of 0). /prevs/ is a hash table
+    associating nodes with the previous node along the shortest path
+    from /start-node/ (excluding /start-node/ itself). Hash tables'
+    equivalence function is *eq?* meaning that you can look up values
+    in them by just passing the node you created with
+    *make-graph-node* as a key.
